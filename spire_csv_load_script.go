@@ -11,7 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"encoding/json"
-	//"github.com/NewtopiaCI/common/log"
+	"github.com/NewtopiaCI/common/log"
 	"github.com/NewtopiaCI/common/models"
 	"github.com/NewtopiaCI/common/database"
 	jp "github.com/dustin/go-jsonpointer"
@@ -32,7 +32,7 @@ type CommunityCSVTable struct {
 }
 
 func init() {
-	// //Set up logging connection for common/log
+	//Set up logging connection for common/log
 	// configLog := log.LogConfiguration{
 	// 	Tag:       "producer_spire_script",
 	// 	Network:   "tcp",
@@ -57,24 +57,7 @@ func init() {
 
 func main(){
 	log.Print("Start Script")
-	// var record = make(map[string]interface{})
-	// record["first_name"] = "Paul"
-	// record["last_name"] = "Washer"
-	// record["email"] = "allonsy@tardis.com"
-	// record["gender"] = "M"
-	// record["birth_date"] = "1952-01-01"
-	// record["profile"] = "John3:16"
-	// record["password"] = "Password123"
-	// record["source_member_id"] = "9a1ad872-569d-4178-8ef4-2a85690738ec"
-	// record["access_code"] = "GYZ8NL"
-
-	// //endpoint := "http://api.staging.spire.me/me"
-	// authToken, err := provisionSpireUser(record)
-	// if err != nil{
-	// 	log.Print("Spire extraction script error: ", err)
-	// }
 	extractFile("spire_test_load.csv")
-	//log.Print("authToken: ", authToken)
 }
 
 func extractFile(filename string){
