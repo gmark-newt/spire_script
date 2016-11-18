@@ -11,8 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"encoding/json"
-	"github.com/NewtopiaCI/common/log"
-	"github.com/NewtopiaCI/common/models"
+	models "github.com/NewtopiaCI/common/models"
 	"github.com/NewtopiaCI/common/database"
 	jp "github.com/dustin/go-jsonpointer"
 	"bytes"
@@ -29,35 +28,36 @@ type CommunityCSVTable struct {
 	BirthDate	string    `json:"birth_date"`  			// col 7
 	Profile		string    `json:"profile"`  			// col 8
 	Password	string    `json:"password"`  			// col 9
+	Avatar		string    `json:"profile_image"`  		// col 10
 }
 
 func init() {
-	//Set up logging connection for common/log
-	// configLog := log.LogConfiguration{
-	// 	Tag:       "producer_spire_script",
-	// 	Network:   "tcp",
-	// 	DBint:     1,
-	// 	LogServer: "192.168.99.100:6379",
-	// 	IsDebug:   false,
-	// 	Version:   "1",
-	// }
-	// log.SetConfiguration(configLog)
 
 	// Set up DB connection for common/database, as models.User functions use that configuration
+	log.Print("Configure DB")
+	// dbConfig := database.DBConfiguration{
+	// 	Host: 		"198.168.99.100",
+	// 	Port: 		5432,
+	// 	SSLMode: 	"disable",
+	// 	User:     	"postgres",
+	// 	Password:   "3x1mpl3",
+	// 	Database:   "devlocal_app",
+	// }
+
 	dbConfig := database.DBConfiguration{
 		Host: 		"localhost",
-		Port: 		5432,
+		Port: 		5558,
 		SSLMode: 	"disable",
-		User:     	"devadm",
-		Password:   "cHangeIT",
-		Database:   "devlocal_app",
+		User:     	"prdapp",
+		Password:   "",
+		Database:   "newtopia_app",
 	}
 	database.SetAppDatabase(dbConfig)
 }
 
 func main(){
 	log.Print("Start Script")
-	extractFile("spire_test_load.csv")
+	extractFile("spire_Adam.csv")	//Need to manually change this filename for every CSV to parse
 }
 
 func extractFile(filename string){
@@ -109,6 +109,7 @@ func extractFile(filename string){
 			BirthDate:  row[7],
 			Profile:	row[8],
 			Password:  	row[9],
+			Avatar:  	row[10],
 		}
 
 		//Grab Authorization Token from Spire Endpoint
@@ -122,6 +123,10 @@ func extractFile(filename string){
 		record["password"] = data.Password
 		record["source_member_id"] = data.UserId
 		record["access_code"] = data.GroupToken
+
+		if data.Avatar != "" {
+			record["profile_image"] = data.Avatar
+		}
 
 		authToken, err := provisionSpireUser(record)
 		if err != nil{
@@ -155,8 +160,14 @@ func provisionSpireUser(record map[string]interface{}) (string, error){
 
 	var body = make(map[string]interface{})
 	body["user"] = record
-	body["client_id"] = "3b589mploshagqk6wwwa2owbu"
-	body["client_secret"] = "7dusaw514t1g9n8b8jia41cto"
+	
+	//Old Staging Credentials
+	//body["client_id"] = "3b589mploshagqk6wwwa2owbu"
+	//body["client_secret"] = "7dusaw514t1g9n8b8jia41cto"
+
+	//New PRD Credentials
+	body["client_id"] = "da38m3prhb1tv1hoa5vbk0sv7"
+	body["client_secret"] = "9nd7ve0sdyrjon46wzpzd9wc7"
 
 	log.Print(body)
 
@@ -168,7 +179,8 @@ func provisionSpireUser(record map[string]interface{}) (string, error){
 	log.Print(string(jsonData))
 
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", "http://api.staging.spire.me/users", bytes.NewBuffer(jsonData))
+	//req, err := http.NewRequest("POST", "http://api.staging.spire.me/users", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", "https://api.newtopia.spireintegrations.com/users", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", err
 	}
